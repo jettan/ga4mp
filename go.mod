@@ -1,3 +1,3 @@
-module go.seankhliao.com/ga4mp
+module github.com/jettan/ga4mp
 
 go 1.17
