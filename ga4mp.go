@@ -125,35 +125,14 @@ func (c *Client) prepareRequest(ctx context.Context, r *Request, url string) (*h
 
 type Request struct {
 	// Required: A unique ID per user/instance combination
-	ClientID string `json:"client_id"`
-	// A unique cross platform ID for the user
-	UserID string `json:"user_id"`
-	// Backdate the event
-	TimestampMicros    int64             `json:"timestamp_micros"`
-	UserProperties     map[string]string `json:"user_properties"`
-	NonPersonalizedAds bool              `json:"non_personalized_ads"`
-	Events             []Event           `json:"events"`
+	ClientID string  `json:"client_id"`
+	Events   []Event `json:"events"`
 }
 
 func (r Request) validate() error {
 	if len(r.ClientID) == 0 {
 		return fmt.Errorf("ClientID must be set")
 	}
-	if d := time.Since(time.UnixMicro(r.TimestampMicros)); d > 3*72*time.Hour {
-		return fmt.Errorf("timestamp from longer than 3 days back: %v", d)
-	}
-	if len(r.UserProperties) > 25 {
-		return fmt.Errorf("request exceeds 25 user_properties: %d", len(r.UserProperties))
-	}
-	for k, v := range r.UserProperties {
-		if err := validName(k, 24, reservedUserProperties, reservedUserPropertyPrefix); err != nil {
-			return fmt.Errorf("invalid user property name: %w", err)
-		}
-		if len(v) > 36 {
-			return fmt.Errorf("user property longer than 36: %q", v)
-		}
-	}
-
 	if len(r.Events) > 25 {
 		return fmt.Errorf("request exceeds 25 events: %d", len(r.Events))
 	}
